@@ -3,6 +3,7 @@ import { Outlet, Navigate } from 'react-router-dom';
 import { Menu, X, Bell } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 
 export default function AppLayout() {
     const token = useAuthStore((s) => s.token);
@@ -56,10 +57,11 @@ export default function AppLayout() {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12">
-                    <div className="animate-in fade-in duration-700 max-w-7xl mx-auto">
+                <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 flex flex-col">
+                    <div className="animate-in fade-in duration-700 max-w-7xl mx-auto w-full flex-1">
                         <Outlet />
                     </div>
+                    <Footer />
                 </main>
             </div>
         </div>
