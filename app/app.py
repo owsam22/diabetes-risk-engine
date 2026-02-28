@@ -107,6 +107,7 @@ Respond ONLY with the raw JSON object, no markdown, no extra text."""
 # ─── Auth Routes ────────────────────────────────────────────────────────────
 
 @app.route("/api/auth/register", methods=["POST"])
+@app.route("/auth/register", methods=["POST"])
 def register():
     db = get_db()
     data = request.get_json()
@@ -136,6 +137,7 @@ def register():
 
 
 @app.route("/api/auth/login", methods=["POST"])
+@app.route("/auth/login", methods=["POST"])
 def login():
     db = get_db()
     data = request.get_json()
@@ -158,6 +160,7 @@ def login():
 
 
 @app.route("/api/auth/me", methods=["GET"])
+@app.route("/auth/me", methods=["GET"])
 @jwt_required()
 def me():
     db = get_db()
@@ -171,6 +174,7 @@ def me():
 # ─── Prediction Route ────────────────────────────────────────────────────────
 
 @app.route("/api/predict", methods=["POST"])
+@app.route("/predict", methods=["POST"])
 @jwt_required()
 def predict():
     db = get_db()
@@ -230,6 +234,7 @@ def predict():
 # ─── What-If Simulation Route (no save, no AI) ──────────────────────────────
 
 @app.route("/api/simulate", methods=["POST"])
+@app.route("/simulate", methods=["POST"])
 @jwt_required()
 def simulate():
     data = request.get_json()
@@ -263,6 +268,7 @@ def simulate():
 # ─── History Route ───────────────────────────────────────────────────────────
 
 @app.route("/api/history", methods=["GET"])
+@app.route("/history", methods=["GET"])
 @jwt_required()
 def history():
     db = get_db()
@@ -278,6 +284,7 @@ def history():
 # ─── CSV Export ──────────────────────────────────────────────────────────────
 
 @app.route("/api/export/csv", methods=["GET"])
+@app.route("/export/csv", methods=["GET"])
 @jwt_required()
 def export_csv():
     db = get_db()
