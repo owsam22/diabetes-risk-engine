@@ -13,7 +13,7 @@ venv/
 
 # Large data files (optional - if you want to keep data local only)
 # dataset/
-model/
+
 rf_diabetes_model.pkl
 trained_model.pkl
 
