@@ -98,48 +98,98 @@
                 </form>
             </section>
 
-            <section class="flex flex-col justify-center">
-                {% if result %}
-                <div class="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 text-center animate-fade-in">
-                    <h3 class="text-xl font-semibold text-slate-500 mb-4 uppercase tracking-widest">Assessment Result</h3>
-                    
-                    <div class="mb-6">
-                        {% if result.prediction == 1 %}
-                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 text-red-600 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                        </div>
-                        <h4 class="text-4xl font-bold text-red-600 mb-2">High Risk</h4>
-                        {% else %}
-                        <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h4 class="text-4xl font-bold text-emerald-600 mb-2">Low Risk</h4>
-                        {% endif %}
-                    </div>
+           <section class="flex flex-col justify-center space-y-6">
 
-                    <div class="bg-slate-50 rounded-2xl p-6 mb-6">
-                        <p class="text-sm text-slate-500 mb-1">Risk Probability Score</p>
-                        <p class="text-2xl font-mono font-bold text-slate-800">{{ (result.risk_score * 100) | round(2) }}%</p>
-                    </div>
+    {% if result %}
+    <!-- Assessment Result Card -->
+    <div class="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 text-center animate-fade-in">
+        <h3 class="text-xl font-semibold text-slate-500 mb-4 uppercase tracking-widest">Assessment Result</h3>
 
-                    <p class="text-sm text-slate-400 italic">
-                        *This is a machine learning prediction and should not replace professional medical advice.
-                    </p>
-                </div>
-                {% else %}
-                <div class="border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <p class="text-lg">Waiting for data...</p>
-                    <p class="text-sm">Enter patient details and click predict to see the analysis.</p>
-                </div>
-                {% endif %}
-            </section>
+        <div class="mb-6">
+            {% if result.prediction == 1 %}
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 text-red-600 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h4 class="text-4xl font-bold text-red-600 mb-2">High Risk</h4>
+            {% else %}
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h4 class="text-4xl font-bold text-emerald-600 mb-2">Low Risk</h4>
+            {% endif %}
+        </div>
+
+        <div class="bg-slate-50 rounded-2xl p-6 mb-6">
+            <p class="text-sm text-slate-500 mb-1">Risk Probability Score</p>
+            <p class="text-2xl font-mono font-bold text-slate-800">{{ (result.risk_score * 100) | round(2) }}%</p>
+        </div>
+
+        <p class="text-sm text-slate-400 italic">
+            *This is a machine learning prediction and should not replace professional medical advice.
+        </p>
+    </div>
+
+    <!-- AI Suggestions / Tips -->
+    <div class="bg-white p-10 rounded-3xl shadow-xl border border-slate-100 text-left animate-fade-in">
+        <h3 class="text-xl font-semibold text-slate-500 mb-4 uppercase tracking-widest">AI Suggestions / Tips</h3>
+        {% if ai_tips %}
+        <ul class="list-disc list-inside text-slate-700 space-y-2">
+            {% for tip in ai_tips %}
+            <li>{{ tip }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-slate-400 italic">No suggestions available.</p>
+        {% endif %}
+    </div>
+
+    <!-- Download PDF Button -->
+    <div class="flex justify-center">
+        <button id="downloadPdfBtn" class="accent-gradient text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:opacity-90 transition-all transform hover:-translate-y-1">
+            Download Report (PDF)
+        </button>
+    </div>
+
+    {% else %}
+    <!-- Waiting for Data -->
+    <div class="border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center text-slate-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p class="text-lg">Waiting for data...</p>
+        <p class="text-sm">Enter patient details and click predict to see the analysis.</p>
+    </div>
+    {% endif %}
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+document.getElementById("downloadPdfBtn")?.addEventListener("click", function () {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Risk content
+    const riskText = document.querySelector('.bg-white p-2, .bg-white p')?.innerText || '';
+    const aiText = Array.from(document.querySelectorAll('.bg-white ul li')).map(li => li.innerText).join('\n') || 'No AI suggestions';
+
+    doc.setFontSize(14);
+    doc.text("Diabetes Risk Assessment Report", 10, 20);
+    doc.setFontSize(12);
+    doc.text("Risk Result:", 10, 35);
+    doc.text(riskText, 10, 45);
+    doc.text("AI Suggestions / Tips:", 10, 60);
+    doc.text(aiText, 10, 70);
+
+    doc.save("HealthCheck_Report.pdf");
+});
+</script>
         </div>
     </main>
 

@@ -16,3 +16,5 @@ venv/
 model/
 rf_diabetes_model.pkl
 trained_model.pkl
+
+.env
