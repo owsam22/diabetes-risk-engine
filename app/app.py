@@ -117,23 +117,27 @@ def register():
 
     email = data["email"].lower().strip()
 
-    if db.users.find_one({"email": email}):
-        return jsonify({"error": "Email already registered"}), 409
+    try:
+        if db.users.find_one({"email": email}):
+            return jsonify({"error": "Email already registered"}), 409
 
-    user_doc = {
-        "email": email,
-        "name": data.get("name", email.split("@")[0]),
-        "password_hash": generate_password_hash(data["password"]),
-        "created_at": datetime.now(timezone.utc)
-    }
-    result = db.users.insert_one(user_doc)
-    user_id = str(result.inserted_id)
+        user_doc = {
+            "email": email,
+            "name": data.get("name", email.split("@")[0]),
+            "password_hash": generate_password_hash(data["password"]),
+            "created_at": datetime.now(timezone.utc)
+        }
+        result = db.users.insert_one(user_doc)
+        user_id = str(result.inserted_id)
 
-    token = create_access_token(identity=user_id)
-    return jsonify({
-        "token": token,
-        "user": {"id": user_id, "email": email, "name": user_doc["name"]}
-    }), 201
+        token = create_access_token(identity=user_id)
+        return jsonify({
+            "token": token,
+            "user": {"id": user_id, "email": email, "name": user_doc["name"]}
+        }), 201
+    except Exception as e:
+        print(f"Registration Error: {e}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
 @app.route("/api/auth/login", methods=["POST"])
@@ -142,21 +146,25 @@ def login():
     db = get_db()
     data = request.get_json()
 
-    if not data or not data.get("email") or not data.get("password"):
-        return jsonify({"error": "Email and password required"}), 400
+    try:
+        if not data or not data.get("email") or not data.get("password"):
+            return jsonify({"error": "Email and password required"}), 400
 
-    email = data["email"].lower().strip()
-    user = db.users.find_one({"email": email})
+        email = data["email"].lower().strip()
+        user = db.users.find_one({"email": email})
 
-    if not user or not check_password_hash(user["password_hash"], data["password"]):
-        return jsonify({"error": "Invalid credentials"}), 401
+        if not user or not check_password_hash(user["password_hash"], data["password"]):
+            return jsonify({"error": "Invalid credentials"}), 401
 
-    user_id = str(user["_id"])
-    token = create_access_token(identity=user_id)
-    return jsonify({
-        "token": token,
-        "user": {"id": user_id, "email": user["email"], "name": user.get("name", email)}
-    })
+        user_id = str(user["_id"])
+        token = create_access_token(identity=user_id)
+        return jsonify({
+            "token": token,
+            "user": {"id": user_id, "email": user["email"], "name": user.get("name", email)}
+        })
+    except Exception as e:
+        print(f"Login Error: {e}")
+        return jsonify({"error": "Internal Server Error", "details": str(e)}), 500
 
 
 @app.route("/api/auth/me", methods=["GET"])
