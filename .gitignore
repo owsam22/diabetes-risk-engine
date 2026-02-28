@@ -18,3 +18,4 @@ rf_diabetes_model.pkl
 trained_model.pkl
 
 .env
+test.py
