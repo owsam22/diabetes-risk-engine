@@ -66,8 +66,9 @@ export default function RegisterPage() {
                             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Preferred Name</label>
                             <div className="relative">
                                 <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <br />
                                 <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-                                    className="input-field pl-10" placeholder="e.g. John Doe" />
+                                    className="input-field pl-10" placeholder="e.g. sam" />
                             </div>
                         </div>
 
@@ -75,6 +76,7 @@ export default function RegisterPage() {
                             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email Address</label>
                             <div className="relative">
                                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <br />
                                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                                     className="input-field pl-10" placeholder="name@email.com" required />
                             </div>
@@ -84,6 +86,7 @@ export default function RegisterPage() {
                             <label className="block text-sm font-semibold text-slate-700 mb-1.5">Secure Password</label>
                             <div className="relative">
                                 <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <br />
                                 <input type={showPassword ? 'text' : 'password'} value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="input-field pl-10 pr-10" placeholder="At least 6 characters" required />
