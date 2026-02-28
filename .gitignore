@@ -19,3 +19,6 @@ trained_model.pkl
 
 .env
 test.py
+
+deployment_guide.md
+documentation.md
