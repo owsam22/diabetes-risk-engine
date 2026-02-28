@@ -26,7 +26,7 @@ jwt = JWTManager(app)
 
 # Load ML model
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model = joblib.load(os.path.join(BASE_DIR, "../model/rf_diabetes_model.pkl"))
+model = joblib.load(os.path.join(BASE_DIR, "../model/rf_diabetes_model_compressed.pkl"))
 train_cols = joblib.load(os.path.join(BASE_DIR, "../model/train_columns.pkl"))
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
