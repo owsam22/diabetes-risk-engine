@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { Send, AlertTriangle, ArrowLeft, HelpCircle } from 'lucide-react';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
 import RiskResultCard from '../components/RiskResultCard';
@@ -24,18 +24,34 @@ const defaultForm = {
 };
 
 // --- Helper Components Moved Outside to Fix Focus Bug ---
-const SelectField = ({ label, name, value, onChange, options }) => (
+const SelectField = ({ label, name, value, onChange, options, tooltip }) => (
     <div className="space-y-1.5">
-        <label className="block text-sm font-semibold text-slate-700">{label}</label>
+        <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+            {label}
+            {tooltip && (
+                <div className="tooltip-container">
+                    <HelpCircle size={14} className="text-slate-400 cursor-help" />
+                    <span className="tooltip-text">{tooltip}</span>
+                </div>
+            )}
+        </label>
         <select name={name} value={value} onChange={onChange} className="input-field">
             {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
     </div>
 );
 
-const NumberField = ({ label, name, value, onChange, placeholder, step = '1', min, max }) => (
+const NumberField = ({ label, name, value, onChange, placeholder, step = '1', min, max, tooltip }) => (
     <div className="space-y-1.5">
-        <label className="block text-sm font-semibold text-slate-700">{label}</label>
+        <label className="flex items-center gap-1.5 text-sm font-semibold text-slate-700">
+            {label}
+            {tooltip && (
+                <div className="tooltip-container">
+                    <HelpCircle size={14} className="text-slate-400 cursor-help" />
+                    <span className="tooltip-text">{tooltip}</span>
+                </div>
+            )}
+        </label>
         <input type="number" name={name} value={value} onChange={onChange}
             placeholder={placeholder} step={step} min={min} max={max}
             className="input-field" required />
@@ -110,39 +126,55 @@ export default function AssessmentPage() {
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Row 1 */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <SelectField label="Gender" name="gender" value={form.gender} onChange={handleChange} options={[
-                                { value: 'Male', label: 'Male' },
-                                { value: 'Female', label: 'Female' },
-                                { value: 'Other', label: 'Other' },
-                            ]} />
-                            <NumberField label="Age" name="age" value={form.age} onChange={handleChange} placeholder="e.g. 45" min="1" max="120" />
+                            <SelectField label="Gender" name="gender" value={form.gender} onChange={handleChange}
+                                tooltip="Patient's biological sex at birth."
+                                options={[
+                                    { value: 'Male', label: 'Male' },
+                                    { value: 'Female', label: 'Female' },
+                                    { value: 'Other', label: 'Other' },
+                                ]} />
+                            <NumberField label="Age" name="age" value={form.age} onChange={handleChange}
+                                tooltip="Patient's age in years."
+                                placeholder="e.g. 45" min="1" max="120" />
                         </div>
 
                         {/* Row 2 */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <SelectField label="Hypertension" name="hypertension" value={form.hypertension} onChange={handleChange} options={[
-                                { value: '0', label: 'No' },
-                                { value: '1', label: 'Yes' },
-                            ]} />
-                            <SelectField label="Heart Disease" name="heart_disease" value={form.heart_disease} onChange={handleChange} options={[
-                                { value: '0', label: 'No' },
-                                { value: '1', label: 'Yes' },
-                            ]} />
+                            <SelectField label="Hypertension" name="hypertension" value={form.hypertension} onChange={handleChange}
+                                tooltip="History of high blood pressure (140/90 mmHg or higher)."
+                                options={[
+                                    { value: '0', label: 'No' },
+                                    { value: '1', label: 'Yes' },
+                                ]} />
+                            <SelectField label="Heart Disease" name="heart_disease" value={form.heart_disease} onChange={handleChange}
+                                tooltip="History of coronary artery disease, heart failure, or other cardiac conditions."
+                                options={[
+                                    { value: '0', label: 'No' },
+                                    { value: '1', label: 'Yes' },
+                                ]} />
                         </div>
 
                         {/* Row 3 */}
-                        <SelectField label="Smoking History" name="smoking_history" value={form.smoking_history} onChange={handleChange} options={[
-                            { value: 'never', label: 'Never' },
-                            { value: 'former', label: 'Former Smoker' },
-                            { value: 'current', label: 'Current Smoker' },
-                            { value: 'not current', label: 'Not Currently Smoking' },
-                        ]} />
+                        <SelectField label="Smoking History" name="smoking_history" value={form.smoking_history} onChange={handleChange}
+                            tooltip="Current or historical tobacco usage patterns."
+                            options={[
+                                { value: 'never', label: 'Never' },
+                                { value: 'former', label: 'Former Smoker' },
+                                { value: 'current', label: 'Current Smoker' },
+                                { value: 'not current', label: 'Not Currently Smoking' },
+                            ]} />
 
                         {/* Row 4 */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <NumberField label="BMI" name="bmi" value={form.bmi} onChange={handleChange} placeholder="24.5" step="0.1" min="10" max="80" />
-                            <NumberField label="HbA1c Level (%)" name="HbA1c_level" value={form.HbA1c_level} onChange={handleChange} placeholder="5.7" step="0.1" min="3" max="15" />
-                            <NumberField label="Blood Glucose (mg/dL)" name="blood_glucose_level" value={form.blood_glucose_level} onChange={handleChange} placeholder="100" min="50" max="500" />
+                            <NumberField label="BMI" name="bmi" value={form.bmi} onChange={handleChange}
+                                tooltip="Body Mass Index. A measure of body fat based on height and weight."
+                                placeholder="24.5" step="0.1" min="10" max="80" />
+                            <NumberField label="HbA1c Level (%)" name="HbA1c_level" value={form.HbA1c_level} onChange={handleChange}
+                                tooltip="Hemoglobin A1c. Reflects average blood sugar levels over the past 2-3 months."
+                                placeholder="5.7" step="0.1" min="3" max="15" />
+                            <NumberField label="Blood Glucose (mg/dL)" name="blood_glucose_level" value={form.blood_glucose_level} onChange={handleChange}
+                                tooltip="Current blood sugar concentration measured in mg/dL."
+                                placeholder="100" min="50" max="500" />
                         </div>
 
                         {/* Info banner */}
