@@ -171,7 +171,14 @@ export default function AssessmentPage() {
             ) : (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <RiskResultCard result={result} />
-                    <AISuggestionsPanel suggestions={result?.ai_suggestions} riskLevel={result?.prediction} />
+                    <AISuggestionsPanel
+                        suggestions={result?.ai_suggestions}
+                        riskLevel={result?.prediction}
+                        assessmentId={result?.id}
+                        onSuggestionsFetched={(suggestions) => {
+                            setResult(prev => ({ ...prev, ai_suggestions: suggestions }));
+                        }}
+                    />
                     <div className="flex justify-center pt-4">
                         <button onClick={resetForm} className="btn-ghost px-12 py-3 flex items-center gap-2 font-semibold">
                             <ArrowLeft size={16} /> New Assessment
