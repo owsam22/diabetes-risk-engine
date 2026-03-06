@@ -18,7 +18,7 @@ export default function AISuggestionsPanel({ suggestions, riskLevel, assessmentI
         try {
             const { data } = await api.post(`/suggestions/${assessmentId}`);
             onSuggestionsFetched(data);
-            toast.success('AI suggestions generated!');
+            toast.success('Personalized suggestions generated!');
         } catch (err) {
             toast.error('Failed to get suggestions. Please try again.');
         } finally {
@@ -43,7 +43,7 @@ export default function AISuggestionsPanel({ suggestions, riskLevel, assessmentI
                 </div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 border border-slate-100 rounded-2xl">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Model: GPT-OSS-120B</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Protocol: Direct-to-Patient</span>
                 </div>
             </div>
 
@@ -52,7 +52,7 @@ export default function AISuggestionsPanel({ suggestions, riskLevel, assessmentI
                     <div className="p-4 bg-white rounded-full shadow-sm mb-4 border border-slate-100">
                         <Sparkles size={32} className="text-emerald-500" />
                     </div>
-                    <h4 className="text-lg font-bold text-slate-800 mb-2">Detailed AI Recommendations</h4>
+                    <h4 className="text-lg font-bold text-slate-800 mb-2">Personalized Clinical Insights</h4>
                     <p className="text-sm text-slate-500 text-center max-w-sm mb-8 px-6">
                         Get personalized dietary, exercise, and lifestyle advice based on your clinical results.
                     </p>
@@ -78,7 +78,7 @@ export default function AISuggestionsPanel({ suggestions, riskLevel, assessmentI
                     </button>
                     {loading && (
                         <p className="text-[10px] uppercase font-bold tracking-tighter text-slate-400 mt-4 animate-pulse">
-                            Communicating with medical AI...
+                            Processing health metrics...
                         </p>
                     )}
                 </div>
@@ -122,7 +122,7 @@ export default function AISuggestionsPanel({ suggestions, riskLevel, assessmentI
 
             <div className="mt-8 p-4 bg-slate-50 rounded-2xl flex items-center gap-3">
                 <Info size={14} className="text-slate-400" />
-                <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">Disclaimer: AI suggestions are for educational purposes and not a prescription.</p>
+                <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">Disclaimer: Suggestions are based on clinical best practices for educational purposes and are not a substitute for professional medical advice.</p>
             </div>
         </div>
     );
