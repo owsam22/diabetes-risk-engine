@@ -29,8 +29,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model = joblib.load(os.path.join(BASE_DIR, "../model/rf_diabetes_model_compressed.pkl"))
 train_cols = joblib.load(os.path.join(BASE_DIR, "../model/train_columns.pkl"))
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = "openai/gpt-oss-120b:free"
+import random
 
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
@@ -49,59 +48,123 @@ def serialize_doc(doc):
     return doc
 
 
-def get_ai_suggestions(patient_data: dict, risk_result: dict) -> dict:
+def get_custom_suggestions(patient_data: dict, risk_result: dict) -> dict:
     """
-    Call OpenRouter to get structured AI suggestions split by category.
-    Returns: { diet: [...], exercise: [...], lifestyle: [...] }
+    Generate personalized health suggestions based on patient data.
     """
-    try:
-        risk_label = "High" if risk_result["prediction"] == 1 else "Low"
-        prompt = f"""You are a medical AI assistant. A patient has been assessed for diabetes risk.
+    bmi = patient_data['bmi']
+    glucose = patient_data['blood_glucose_level']
+    hba1c = patient_data['HbA1c_level']
+    age = patient_data['age']
+    is_high_risk = risk_result["prediction"] == 1
 
-Patient Data:
-- Gender: {patient_data['gender']}, Age: {patient_data['age']}
-- BMI: {patient_data['bmi']}, HbA1c: {patient_data['HbA1c_level']}%, Blood Glucose: {patient_data['blood_glucose_level']} mg/dL
-- Hypertension: {'Yes' if patient_data['hypertension'] else 'No'}, Heart Disease: {'Yes' if patient_data['heart_disease'] else 'No'}
-- Smoking: {patient_data['smoking_history']}
-- Risk Score: {risk_result['risk_score']:.1%} ({risk_label} Risk)
+    # Define pools of suggestions
+    diet_pools = {
+        "general": [
+            "Prioritize whole, unprocessed foods like vegetables, lean proteins, and whole grains.",
+            "Practice portion control by using smaller plates and listening to hunger cues.",
+            "Stay hydrated primarily with water instead of sugary drinks or juices.",
+            "Include a source of fiber in every meal to help regulate blood sugar."
+        ],
+        "high_glucose": [
+            "Limit high-glycemic foods like white bread, sugary cereals, and sweets.",
+            "Focus on non-starchy vegetables (leafy greens, broccoli, peppers) for most meals.",
+            "Consider a low-carbohydrate approach to help stabilize blood glucose levels.",
+            "Avoid late-night snacking, especially foods high in refined sugars."
+        ],
+        "high_bmi": [
+            "Reduce calorie-dense foods and focus on nutrient-rich, lower-calorie options.",
+            "Try to cook more meals at home to better control ingredients and portions.",
+            "Incorporate healthy fats like avocados and nuts in moderation.",
+            "Slow down while eating to allow your brain to register fullness."
+        ]
+    }
 
-Return a JSON object with exactly these 3 keys: "diet", "exercise", "lifestyle".
-Each key maps to an array of 3 short, actionable, friendly tips (strings).
-For {risk_label} risk patients, {'suggest immediate corrective actions' if risk_label == 'High' else 'focus on preventive and maintenance steps'}.
-Respond ONLY with the raw JSON object, no markdown, no extra text."""
+    exercise_pools = {
+        "general": [
+            "Aim for at least 150 minutes of moderate-intensity aerobic activity per week.",
+            "Incorporate strength training exercises at least two days a week.",
+            "Find physical activities you enjoy, like walking, swimming, or cycling.",
+            "Break up long periods of sitting with short walks or stretching."
+        ],
+        "high_bmi": [
+            "Start with low-impact exercises like swimming or brisk walking to protect joints.",
+            "Use a pedometer or fitness tracker to aim for a daily step goal, starting small.",
+            "Focus on consistency rather than intensity when starting a new routine.",
+            "Consider working with a fitness professional to develop a safe, effective plan."
+        ],
+        "senior": [
+            "Focus on balance and flexibility exercises to prevent falls.",
+            "Engage in low-impact activities like Tai Chi or water aerobics.",
+            "Maintain muscle mass through gentle resistance band exercises.",
+            "Consult with a doctor before starting a new, vigorous exercise program."
+        ]
+    }
 
-        payload = {
-            "model": OPENROUTER_MODEL,
-            "messages": [{"role": "user", "content": prompt}],
-            "response_format": {"type": "json_object"}
-        }
-        headers = {
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json"
-        }
+    lifestyle_pools = {
+        "general": [
+            "Prioritize 7-9 hours of quality sleep each night for metabolic health.",
+            "Manage stress through techniques like meditation, deep breathing, or hobbies.",
+            "Schedule regular check-ups with your healthcare provider for monitoring.",
+            "Maintain a consistent daily routine for meals, exercise, and sleep."
+        ],
+        "smoker": [
+            "Seek support and resources to develop a plan for quitting smoking.",
+            "Avoid environments that trigger the urge to smoke.",
+            "Remind yourself of the long-term health benefits of being smoke-free.",
+            "Consider nicotine replacement therapy after consulting with a physician."
+        ],
+        "high_risk": [
+            "Monitor your blood glucose levels regularly as recommended by your doctor.",
+            "Keep a detailed log of your diet, activity, and glucose readings.",
+            "Educate yourself and your family about the early signs of diabetes.",
+            "Follow your prescribed medical plan strictly and report any changes to your doctor."
+        ]
+    }
 
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers, json=payload, timeout=20
-        )
-        response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
-        suggestions = json.loads(content)
+    # Selection Logic
+    selected_diet = []
+    selected_exercise = []
+    selected_lifestyle = []
 
-        # Ensure all keys exist
-        return {
-            "diet": suggestions.get("diet", []),
-            "exercise": suggestions.get("exercise", []),
-            "lifestyle": suggestions.get("lifestyle", [])
-        }
+    # Diet Selection
+    if glucose > 140 or hba1c > 6.0:
+        selected_diet.extend(random.sample(diet_pools["high_glucose"], 2))
+        selected_diet.append(random.choice(diet_pools["general"]))
+    elif bmi > 25:
+        selected_diet.extend(random.sample(diet_pools["high_bmi"], 2))
+        selected_diet.append(random.choice(diet_pools["general"]))
+    else:
+        selected_diet.extend(random.sample(diet_pools["general"], 3))
 
-    except Exception as e:
-        print("OpenRouter API error:", e)
-        return {
-            "diet": ["Maintain a balanced diet rich in vegetables and whole grains."],
-            "exercise": ["Aim for at least 30 minutes of moderate exercise daily."],
-            "lifestyle": ["Monitor your blood sugar regularly and stay hydrated."]
-        }
+    # Exercise Selection
+    if age > 60:
+        selected_exercise.extend(random.sample(exercise_pools["senior"], 2))
+        selected_exercise.append(random.choice(exercise_pools["general"]))
+    elif bmi > 30:
+        selected_exercise.extend(random.sample(exercise_pools["high_bmi"], 2))
+        selected_exercise.append(random.choice(exercise_pools["general"]))
+    else:
+        selected_exercise.extend(random.sample(exercise_pools["general"], 3))
+
+    # Lifestyle Selection
+    if patient_data['smoking_history'] not in ['never', 'No Info']:
+        selected_lifestyle.append(random.choice(lifestyle_pools["smoker"]))
+        if is_high_risk:
+            selected_lifestyle.append(random.choice(lifestyle_pools["high_risk"]))
+        selected_lifestyle.append(random.choice(lifestyle_pools["general"]))
+    elif is_high_risk:
+        selected_lifestyle.extend(random.sample(lifestyle_pools["high_risk"], 2))
+        selected_lifestyle.append(random.choice(lifestyle_pools["general"]))
+    else:
+        selected_lifestyle.extend(random.sample(lifestyle_pools["general"], 3))
+
+    # Ensure uniqueness and variety
+    return {
+        "diet": list(dict.fromkeys(selected_diet))[:3],
+        "exercise": list(dict.fromkeys(selected_exercise))[:3],
+        "lifestyle": list(dict.fromkeys(selected_lifestyle))[:3]
+    }
 
 
 # ─── Auth Routes ────────────────────────────────────────────────────────────
@@ -274,8 +337,8 @@ def generate_suggestions(assessment_id):
             "risk_score": assessment["risk_score"]
         }
 
-        # Call AI API
-        ai_suggestions = get_ai_suggestions(patient_data, risk_result)
+        # Call Custom Suggestion Engine
+        ai_suggestions = get_custom_suggestions(patient_data, risk_result)
 
         # Update document
         db.assessments.update_one(
