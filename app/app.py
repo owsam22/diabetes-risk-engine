@@ -216,8 +216,8 @@ def predict():
     pred = int(prob > 0.3)
     result = {"prediction": pred, "risk_score": float(prob)}
 
-    # Get AI suggestions
-    ai_suggestions = get_ai_suggestions(patient_data, result)
+    # Defer AI suggestions to separate request
+    ai_suggestions = None
 
     # Save to MongoDB
     assessment_doc = {
@@ -237,6 +237,57 @@ def predict():
         "ai_suggestions": ai_suggestions,
         "created_at": assessment_doc["created_at"].isoformat()
     })
+
+
+@app.route("/api/suggestions/<assessment_id>", methods=["POST"])
+@jwt_required()
+def generate_suggestions(assessment_id):
+    db = get_db()
+    user_id = get_jwt_identity()
+
+    try:
+        assessment = db.assessments.find_one({
+            "_id": ObjectId(assessment_id),
+            "user_id": ObjectId(user_id)
+        })
+
+        if not assessment:
+            return jsonify({"error": "Assessment not found"}), 404
+
+        # If already has suggestions, just return it
+        if assessment.get("ai_suggestions"):
+            return jsonify(assessment["ai_suggestions"])
+
+        # Prepare data for AI call
+        patient_data = {
+            "gender": assessment["gender"],
+            "age": assessment["age"],
+            "hypertension": assessment["hypertension"],
+            "heart_disease": assessment["heart_disease"],
+            "smoking_history": assessment["smoking_history"],
+            "bmi": assessment["bmi"],
+            "HbA1c_level": assessment["HbA1c_level"],
+            "blood_glucose_level": assessment["blood_glucose_level"]
+        }
+        risk_result = {
+            "prediction": assessment["prediction"],
+            "risk_score": assessment["risk_score"]
+        }
+
+        # Call AI API
+        ai_suggestions = get_ai_suggestions(patient_data, risk_result)
+
+        # Update document
+        db.assessments.update_one(
+            {"_id": ObjectId(assessment_id)},
+            {"$set": {"ai_suggestions": ai_suggestions}}
+        )
+
+        return jsonify(ai_suggestions)
+
+    except Exception as e:
+        print(f"Error generating suggestions: {e}")
+        return jsonify({"error": "Failed to generate suggestions", "details": str(e)}), 500
 
 
 # ─── What-If Simulation Route (no save, no AI) ──────────────────────────────
