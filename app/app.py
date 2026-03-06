@@ -50,75 +50,106 @@ def serialize_doc(doc):
 
 def get_custom_suggestions(patient_data: dict, risk_result: dict) -> dict:
     """
-    Generate personalized health suggestions based on patient data.
+    Generate personalized health suggestions with motivational reinforcement.
     """
     bmi = patient_data['bmi']
     glucose = patient_data['blood_glucose_level']
     hba1c = patient_data['HbA1c_level']
     age = patient_data['age']
+    risk_score = risk_result.get("risk_score", 0)
     is_high_risk = risk_result["prediction"] == 1
 
-    # Define pools of suggestions
+    # Motivational messages for positive reinforcement
+    motivational_pools = {
+        "excellent_score": [
+            f"Spectacular results! Your risk score of {risk_score*100:.1f}% is exceptionally low. Maintain this healthy momentum!",
+            "Great job on your health metrics! Your proactive approach is clearly paying off.",
+            "Excellent stability in your biomarkers. You're setting a great standard for preventive health."
+        ],
+        "good_marker": {
+            "glucose": "Perfect blood glucose regulation! Your body is processing energy exactly as it should.",
+            "bmi": f"Excellent job maintaining a healthy BMI of {bmi}. This significantly reduces metabolic strain.",
+            "hba1c": f"Your HbA1c of {hba1c}% is in the ideal range. This shows great long-term blood sugar stability."
+        },
+        "encouragement": [
+            "Consistency is key. Small daily habits lead to long-term vitality.",
+            "You're in the driver's seat of your health journey. Keep making these smart choices!",
+            "Health is a marathon, not a sprint. Your current pace is perfect."
+        ]
+    }
+
     diet_pools = {
         "general": [
             "Prioritize whole, unprocessed foods like vegetables, lean proteins, and whole grains.",
             "Practice portion control by using smaller plates and listening to hunger cues.",
             "Stay hydrated primarily with water instead of sugary drinks or juices.",
-            "Include a source of fiber in every meal to help regulate blood sugar."
+            "Include fiber-rich foods like legumes and berries to help regulate metabolism."
+        ],
+        "preventive": [
+            "Maintain your balanced diet by focusing on colorful, nutrient-dense vegetables.",
+            "Continue choosing healthy fats like avocados, nuts, and olive oil.",
+            "Your current dietary choices are supporting your metabolic health. Keep it up!",
+            "Mindful eating during social events helps maintain your excellent progress."
         ],
         "high_glucose": [
-            "Limit high-glycemic foods like white bread, sugary cereals, and sweets.",
-            "Focus on non-starchy vegetables (leafy greens, broccoli, peppers) for most meals.",
-            "Consider a low-carbohydrate approach to help stabilize blood glucose levels.",
-            "Avoid late-night snacking, especially foods high in refined sugars."
+            "Limit high-glycemic foods like white bread and sugary cereals to stabilize glucose.",
+            "Focus on non-starchy vegetables (leafy greens, broccoli) for most meals.",
+            "Monitor carbohydrate intake to help manage your blood glucose levels.",
+            "Avoid processed sugars which can cause rapid spikes in your energy levels."
         ],
         "high_bmi": [
-            "Reduce calorie-dense foods and focus on nutrient-rich, lower-calorie options.",
-            "Try to cook more meals at home to better control ingredients and portions.",
-            "Incorporate healthy fats like avocados and nuts in moderation.",
-            "Slow down while eating to allow your brain to register fullness."
+            "Focus on high-volume, low-calorie foods like salads and soups to stay full.",
+            "Try meal prepping at home to better control your nutrient intake.",
+            "Watch out for liquid calories in sodas and flavored coffees.",
+            "Slow down your eating pace to give your body time to signal fullness."
         ]
     }
 
     exercise_pools = {
         "general": [
-            "Aim for at least 150 minutes of moderate-intensity aerobic activity per week.",
-            "Incorporate strength training exercises at least two days a week.",
-            "Find physical activities you enjoy, like walking, swimming, or cycling.",
-            "Break up long periods of sitting with short walks or stretching."
+            "Aim for 150 minutes of moderate aerobic activity weekly, like brisk walking.",
+            "Incorporate strength training at least twice a week to boost metabolism.",
+            "Find activities you love (hiking, dancing, swimming) to stay consistent.",
+            "Break up long sitting periods with 5-minute movement breaks every hour."
+        ],
+        "positive": [
+            "Your active lifestyle is a major contributor to your low risk score. Keep moving!",
+            "Great work staying active. Consistency is your best defense against metabolic issues.",
+            "Building muscle mass through daily activity helps keep your glucose levels stable.",
+            "Continue your regular physical routine—it's clearly working for your body."
         ],
         "high_bmi": [
-            "Start with low-impact exercises like swimming or brisk walking to protect joints.",
-            "Use a pedometer or fitness tracker to aim for a daily step goal, starting small.",
-            "Focus on consistency rather than intensity when starting a new routine.",
-            "Consider working with a fitness professional to develop a safe, effective plan."
+            "Start with low-impact exercises like swimming to protect your joints.",
+            "Focus on incremental goals, like adding 500 steps to your daily count each week.",
+            "Consistency matters more than intensity when building a new routine.",
+            "Consider a mix of cardio and resistance training for optimal weight management."
         ],
         "senior": [
-            "Focus on balance and flexibility exercises to prevent falls.",
-            "Engage in low-impact activities like Tai Chi or water aerobics.",
-            "Maintain muscle mass through gentle resistance band exercises.",
-            "Consult with a doctor before starting a new, vigorous exercise program."
+            "Focus on balance and flexibility exercises like Tai Chi or gentle yoga.",
+            "Engage in low-impact aerobic activities like water aerobics.",
+            "Maintain strength with light resistance band exercises.",
+            "Check with your therapist for a routine that matches your specific mobility."
         ]
     }
 
     lifestyle_pools = {
         "general": [
-            "Prioritize 7-9 hours of quality sleep each night for metabolic health.",
-            "Manage stress through techniques like meditation, deep breathing, or hobbies.",
-            "Schedule regular check-ups with your healthcare provider for monitoring.",
-            "Maintain a consistent daily routine for meals, exercise, and sleep."
+            "Prioritize 7-9 hours of quality sleep for optimal metabolic recovery.",
+            "Practice stress management through deep breathing or meditation.",
+            "Ensure you're getting regular check-ups to track your vital trends.",
+            "A regular sleep-wake schedule helps regulate your body's insulin response."
         ],
-        "smoker": [
-            "Seek support and resources to develop a plan for quitting smoking.",
-            "Avoid environments that trigger the urge to smoke.",
-            "Remind yourself of the long-term health benefits of being smoke-free.",
-            "Consider nicotine replacement therapy after consulting with a physician."
+        "positive": [
+            "Your lifestyle choices are reflected in your excellent health markers. Well done!",
+            "Keep prioritizing your well-being; it's the best investment you'll ever make.",
+            "Your commitment to health is evident. Stay curious and keep learning!",
+            "The balance you've achieved in your daily habits is truly commendable."
         ],
         "high_risk": [
-            "Monitor your blood glucose levels regularly as recommended by your doctor.",
-            "Keep a detailed log of your diet, activity, and glucose readings.",
-            "Educate yourself and your family about the early signs of diabetes.",
-            "Follow your prescribed medical plan strictly and report any changes to your doctor."
+            "Monitor your glucose levels as recommended by your health provider.",
+            "Keep a simple log of your meals and how they make you feel.",
+            "Educate yourself on early signs of diabetes to stay ahead of any changes.",
+            "Follow your medical plan closely and communicate any concerns to your doctor."
         ]
     }
 
@@ -127,39 +158,56 @@ def get_custom_suggestions(patient_data: dict, risk_result: dict) -> dict:
     selected_exercise = []
     selected_lifestyle = []
 
-    # Diet Selection
-    if glucose > 140 or hba1c > 6.0:
-        selected_diet.extend(random.sample(diet_pools["high_glucose"], 2))
-        selected_diet.append(random.choice(diet_pools["general"]))
-    elif bmi > 25:
-        selected_diet.extend(random.sample(diet_pools["high_bmi"], 2))
-        selected_diet.append(random.choice(diet_pools["general"]))
-    else:
-        selected_diet.extend(random.sample(diet_pools["general"], 3))
-
-    # Exercise Selection
-    if age > 60:
-        selected_exercise.extend(random.sample(exercise_pools["senior"], 2))
-        selected_exercise.append(random.choice(exercise_pools["general"]))
-    elif bmi > 30:
-        selected_exercise.extend(random.sample(exercise_pools["high_bmi"], 2))
-        selected_exercise.append(random.choice(exercise_pools["general"]))
-    else:
-        selected_exercise.extend(random.sample(exercise_pools["general"], 3))
-
-    # Lifestyle Selection
-    if patient_data['smoking_history'] not in ['never', 'No Info']:
-        selected_lifestyle.append(random.choice(lifestyle_pools["smoker"]))
-        if is_high_risk:
-            selected_lifestyle.append(random.choice(lifestyle_pools["high_risk"]))
-        selected_lifestyle.append(random.choice(lifestyle_pools["general"]))
-    elif is_high_risk:
+    # High Risk logic (Prediction = 1)
+    if is_high_risk:
+        if glucose > 140 or hba1c > 6.0:
+            selected_diet.extend(random.sample(diet_pools["high_glucose"], 2))
+        else:
+            selected_diet.extend(random.sample(diet_pools["general"], 2))
+        
+        if bmi > 30:
+            selected_exercise.extend(random.sample(exercise_pools["high_bmi"], 2))
+        else:
+            selected_exercise.extend(random.sample(exercise_pools["general"], 2))
+            
         selected_lifestyle.extend(random.sample(lifestyle_pools["high_risk"], 2))
+        # Add one general tip to each
+        selected_diet.append(random.choice(diet_pools["general"]))
+        selected_exercise.append(random.choice(exercise_pools["general"]))
         selected_lifestyle.append(random.choice(lifestyle_pools["general"]))
-    else:
-        selected_lifestyle.extend(random.sample(lifestyle_pools["general"], 3))
 
-    # Ensure uniqueness and variety
+    # Low Risk logic (Prediction = 0)
+    else:
+        # celebrate low risk
+        selected_lifestyle.append(random.choice(motivational_pools["excellent_score"]))
+        
+        # Celebrate specific healthy markers
+        if glucose <= 100:
+            selected_diet.append(motivational_pools["good_marker"]["glucose"])
+        if bmi <= 25:
+            selected_exercise.append(motivational_pools["good_marker"]["bmi"])
+        if hba1c <= 5.7:
+            selected_lifestyle.append(motivational_pools["good_marker"]["hba1c"])
+
+        # Fill remaining with preventive or positive tips
+        if not selected_diet:
+             selected_diet.extend(random.sample(diet_pools["preventive"], 2))
+        elif len(selected_diet) < 3:
+             selected_diet.append(random.choice(diet_pools["preventive"]))
+             
+        if not selected_exercise:
+            selected_exercise.extend(random.sample(exercise_pools["positive"], 2))
+        elif len(selected_exercise) < 3:
+            selected_exercise.append(random.choice(exercise_pools["positive"]))
+
+        if len(selected_lifestyle) < 3:
+            selected_lifestyle.append(random.choice(motivational_pools["encouragement"]))
+        
+        # Final padding to ensure 3 tips
+        while len(selected_diet) < 3: selected_diet.append(random.choice(diet_pools["general"]))
+        while len(selected_exercise) < 3: selected_exercise.append(random.choice(exercise_pools["general"]))
+        while len(selected_lifestyle) < 3: selected_lifestyle.append(random.choice(lifestyle_pools["general"]))
+
     return {
         "diet": list(dict.fromkeys(selected_diet))[:3],
         "exercise": list(dict.fromkeys(selected_exercise))[:3],
@@ -303,6 +351,7 @@ def predict():
 
 
 @app.route("/api/suggestions/<assessment_id>", methods=["POST"])
+@app.route("/suggestions/<assessment_id>", methods=["POST"])
 @jwt_required()
 def generate_suggestions(assessment_id):
     db = get_db()
